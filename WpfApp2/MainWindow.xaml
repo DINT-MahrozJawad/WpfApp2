@@ -5,43 +5,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp2"
         mc:Ignorable="d"
-        Title="MainWindow" Height="502" Width="615">
+        Title="MainWindow" Height="502" Width="615" Background="SandyBrown">
 
     <DockPanel>
-        <Border Margin="10" Height="50" CornerRadius="10" DockPanel.Dock="Top"  BorderThickness="2" BorderBrush="Black">
+        <Border Background="White" Margin="10" Height="50" CornerRadius="10" DockPanel.Dock="Top"  BorderThickness="3" BorderBrush="Black">
             <StackPanel  Orientation="Horizontal">
                 <TextBlock Margin="10" >Dificultad:</TextBlock>
-                <RadioButton Margin="10"></RadioButton>
-                <TextBlock Margin="-5,10,10,10" >Baja</TextBlock>
-                <RadioButton Margin="10"></RadioButton>
-                <TextBlock Margin="-5,10,10,10" >Media</TextBlock>
-                <RadioButton Margin="10"></RadioButton>
-                <TextBlock Margin="-5,10,10,10" >Alta</TextBlock>
-                <Button Margin="20,10,20,385" Width="100">Iniciar</Button>
+                <RadioButton Checked="RadioButton_Checked_Baja" Margin="10">Baja</RadioButton>
+                <RadioButton Checked="RadioButton_Checked_Media" Margin="10">Media</RadioButton>
+                <RadioButton Checked="RadioButton_Checked_Alta" Margin="10">Alta</RadioButton>
+                <Button Click="Button_Click_Iniciar" Margin="10,0,10,10" Height="20" Width="75" Content="Iniciar"></Button>
             </StackPanel>
         </Border>
-        <Border Margin="10" Height="50" CornerRadius="10" DockPanel.Dock="Bottom"  BorderThickness="2" BorderBrush="Black">
+        <Border Background="White" Margin="10" Height="50" CornerRadius="10" DockPanel.Dock="Bottom"  BorderThickness="3" BorderBrush="Black">
             <StackPanel  Orientation="Horizontal">
-                <TextBlock Margin="10" >Dificultad:</TextBlock>
-                <RadioButton Margin="10"></RadioButton>
-                <TextBlock Margin="-5,10,10,10" >Baja</TextBlock>
-                <RadioButton Margin="10"></RadioButton>
-                <TextBlock Margin="-5,10,10,10" >Media</TextBlock>
-                <RadioButton Margin="10"></RadioButton>
-                <TextBlock Margin="-5,10,10,10" >Alta</TextBlock>
-                <Button Margin="20,10,20,385" Width="100">Iniciar</Button>
+                <DockPanel LastChildFill="True" >
+                    <ProgressBar  Margin="10" Height="15" Width="450" DockPanel.Dock="Left" Minimum="0" Maximum="100" Value="75" Name="pbStatus" IsIndeterminate="False" />
+                    <Button DockPanel.Dock="Right"  Height="20" Width="75" Content="Mostrar"  />
+                </DockPanel>
             </StackPanel>
         </Border>
 
-        <Grid x:Name="gridPrincipal" Margin="10">
+        <Grid x:Name="gridPrincipal" Margin="5">
 
-            <StackPanel>
-                <Viewbox Width="100" Height="100">
-                    <TextBlock>💎</TextBlock>
-                </Viewbox>
-            </StackPanel>
-            
-            
+
         </Grid>
 
     </DockPanel>
