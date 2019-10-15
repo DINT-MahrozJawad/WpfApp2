@@ -32,7 +32,8 @@ namespace WpfApp2
         private Viewbox viewbox;
         private TextBlock textBlock;
         private LinearGradientBrush myBrush = new LinearGradientBrush();
-        
+        private LinearGradientBrush myBrush_White = new LinearGradientBrush();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -41,43 +42,44 @@ namespace WpfApp2
             myBrush.GradientStops.Add(new GradientStop(Colors.Yellow, 0.0));
             myBrush.GradientStops.Add(new GradientStop(Colors.Orange, 0.5));
             myBrush.GradientStops.Add(new GradientStop(Colors.Red, 1.0));
+            myBrush_White.GradientStops.Add(new GradientStop(Colors.White, 0));
 
         }
 
         private void GuardaArrayAleatorio()
         {
-            matrizSymbolosCogido = new string[COLUMNAS, numeroFilas];
+            matrizSymbolosCogido = new string[numeroFilas, COLUMNAS];
             int tamañoArrayNum2x2 = (COLUMNAS * numeroFilas) / 2;
-            int[] num2x2 = new int[(tamañoArrayNum2x2*2)-1];
+            int[] num2x2 = new int[(tamañoArrayNum2x2*2)];
             int index = 0;
 
             for (int i = 0; i < tamañoArrayNum2x2; i++)
             {
                 num2x2[i] = NumeroAleatorioSinRepetir(0, tamañoArrayNum2x2);
             }
-            for (int i = tamañoArrayNum2x2-1; i < tamañoArrayNum2x2*2; i++)
+            for (int i = tamañoArrayNum2x2; i < tamañoArrayNum2x2*2; i++)
             {
-                num2x2[i] = NumeroAleatorioRepetidos(0, tamañoArrayNum2x2);
+                num2x2[i] = num2x2[index++];
             }
+            index = 0;
             for (int i = 0; i < numeroFilas; i++)
             {
                 for (int j = 0; j < COLUMNAS; j++)
                 {
-                    matrizSymbolosCogido[i, j] = arraySymbolos[num2x2[index++]];
+                    matrizSymbolosCogido[i, j] = arraySymbolos[num2x2[index]];
                 }
             }
-
-            for (int i = 0; i < numeroFilas; i++)
-                for (int j = 0; j < COLUMNAS; j++)
-                {
-                    VisualizarCartaConIconoYPosicion(i, j, matrizSymbolosCogido[i,j]);
-                }
+            
+            //for (int i = 0; i < numeroFilas; i++)
+            //    for (int j = 0; j < COLUMNAS; j++)
+            //    {
+            //        VisualizarCartaConIconoYPosicion(i, j, matrizSymbolosCogido[i,j]);
+            //    }
 
         }
 
         private void CreaCartasParaOcultar()
         {
-            
             for (int j = 0; j < COLUMNAS; j++)
                 gridPrincipal.ColumnDefinitions.Add(new ColumnDefinition());
             
@@ -88,21 +90,22 @@ namespace WpfApp2
             for (int i = 0; i < numeroFilas; i++)
                 for (int j = 0; j < COLUMNAS; j++)
                 {
-                    VisualizarCartaConIconoYPosicion(i, j, iconoOculto);
+                    VisualizarCartaConIconoYPosicion(i, j, iconoOculto, myBrush);
                 }
         }
 
-        private void VisualizarCartaConIconoYPosicion(int i, int j, string icono)
+        private void VisualizarCartaConIconoYPosicion(int i, int j, string icono, LinearGradientBrush background)
         {
             border = new Border();
             viewbox = new Viewbox();
             textBlock = new TextBlock();
             border.BorderThickness = new Thickness(1);
             border.BorderBrush = Brushes.Black;
-            border.Background = myBrush;
+            border.Background = background;
             border.Margin = new Thickness(2);
             border.CornerRadius = new CornerRadius(5);
 
+            border.MouseLeftButtonDown += Border_MouseLeftButtonDown;
             textBlock.Text = icono;
 
             gridPrincipal.Children.Add(border);
@@ -110,6 +113,18 @@ namespace WpfApp2
             viewbox.Child = textBlock;
             Grid.SetRow(border, i);
             Grid.SetColumn(border, j);
+        }
+
+        private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            viewbox = new Viewbox();
+            textBlock = new TextBlock();
+            ((Border)sender).Background = myBrush_White;
+            ((Border)sender).Child = viewbox;
+            viewbox.Child = textBlock;
+
+            textBlock.Text = arraySymbolos[0];
+
         }
 
         private void RadioButton_Checked_Baja(object sender, RoutedEventArgs e)
@@ -135,7 +150,7 @@ namespace WpfApp2
 
                 GuardaArrayAleatorio();
 
-                //CreaCartasParaOcultar();
+                CreaCartasParaOcultar();
             }
             
         }
@@ -155,20 +170,11 @@ namespace WpfApp2
             {
                 Random random = new Random();
                 aleatorio = random.Next(primerValor, ultimoValor + 1);
-                yaCogidoValor.Add(aleatorio);
             } while (yaCogidoValor.Contains(aleatorio));
+            yaCogidoValor.Add(aleatorio);
             return aleatorio;
         }
-        private int NumeroAleatorioRepetidos(int primerValor, int ultimoValor)
-        {
-            int aleatorio;
-            do
-            {
-                Random random = new Random();
-                aleatorio = random.Next(primerValor, ultimoValor + 1);
-            } while (!yaCogidoValor.Contains(aleatorio));
-            return aleatorio;
-        }
+
     }
 
 }
