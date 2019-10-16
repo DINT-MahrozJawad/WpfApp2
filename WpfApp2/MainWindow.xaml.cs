@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace WpfApp2
 {
@@ -22,37 +23,48 @@ namespace WpfApp2
     /// </summary>
     public partial class MainWindow : Window
     {
-        private const int COLUMNAS = 4;
-        private List<string> yaCogidoValor;
+        private const int COLUMNAS =4;
         private int numeroFilas = int.MinValue;
         private const string iconoOculto = "❓";
-        private List<string> symbolosAleatoriosFijo;
         private string[] arraySymbolos;
         private int tag;
         private int columnasXFilas;
+        private int sumaCartas;
+        private bool juegoIniciado;
+        private List<string> yaCogidoValor;
+        private List<string> symbolosAleatoriosFijo;
         private Random random;
         private Border border;
         private Viewbox viewbox;
         private TextBlock textBlock;
         private TextBlock textBlockAnterior1;
         private TextBlock textBlockAnterior2;
-        private LinearGradientBrush myBrush = new LinearGradientBrush();
-        private LinearGradientBrush myBrush_White = new LinearGradientBrush();
+        private LinearGradientBrush myBrush;
+        private LinearGradientBrush myBrush_White;
 
         public MainWindow()
         {
             InitializeComponent();
+        }
+        //Inicializo Componentes.
+        public void ComponentesParaIniciar()
+        {
+            juegoIniciado = true;
+            pbStatus.Value = 0;
             tag = 0;
+            sumaCartas = 0;
             arraySymbolos = new string[] { "🌟", "💎", "🍂", "🎥", "❤️", "📢", "✈️", "🌻", "📷", "⚽️", "💸", "🌴", "🎈", "🐢", "🌎", "💲", "🎁" };
             yaCogidoValor = new List<string>();
             symbolosAleatoriosFijo = new List<string>();
             random = new Random();
+            myBrush = new LinearGradientBrush();
+            myBrush_White = new LinearGradientBrush();
             myBrush.GradientStops.Add(new GradientStop(Colors.Yellow, 0.0));
             myBrush.GradientStops.Add(new GradientStop(Colors.Orange, 0.5));
             myBrush.GradientStops.Add(new GradientStop(Colors.Red, 1.0));
             myBrush_White.GradientStops.Add(new GradientStop(Colors.White, 0));
         }
-
+        //Sacndo Symbolos Aleatorio y guardando en una lissta.
         private void GuardaArrayAleatorio()
         {
             string[] symbolosAleatorios = new string[columnasXFilas];
@@ -80,7 +92,7 @@ namespace WpfApp2
             } while (symbolosAleatoriosFijo.Count != columnasXFilas) ;
             
         }
-
+        //Creando Cartas Para cuando se inicie se muestre las cartas para adivinar.
         private void CreaCartasParaOcultar()
         {
             for (int j = 0; j < COLUMNAS; j++)
@@ -96,7 +108,7 @@ namespace WpfApp2
                     VisualizarCartaConIconoYPosicion(i, j, iconoOculto, myBrush);
                 }
         }
-
+        //Visualiza cartas para el metodo "CreaCartasParaOcultar()".
         private void VisualizarCartaConIconoYPosicion(int i, int j, string icono, LinearGradientBrush background)
         {
             border = new Border();
@@ -119,7 +131,7 @@ namespace WpfApp2
             Grid.SetRow(border, i);
             Grid.SetColumn(border, j);
         }
-
+        //Comparo los symbolos si son iguales o no, si son iguales se quedan abiertos y la barra se avanza lo que se debe avanzar.
         private void Border_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (textBlockAnterior1 != null && textBlockAnterior2 != null)
@@ -136,17 +148,23 @@ namespace WpfApp2
                     border = (Border)viewbox.Parent;
                     border.Background = myBrush;
                     textBlockAnterior2.Text = iconoOculto;
-                    
                 }
                 else
                 {
-                    //
+                    sumaCartas +=2;
+                    float a = sumaCartas * 100 / columnasXFilas;
+                    int value = (int)Math.Round(a, 0);
+                    pbStatus.Value = value;
+                    if (sumaCartas == columnasXFilas)
+                    {
+                        MessageBox.Show("¡Enhorabuena! Partida Finalizada");
+                    }
                 }
                 textBlockAnterior1 = null;
                 textBlockAnterior2 = null;
             }
         }
-        
+        //Abro la carta cambiando el fondo y el symbolo.
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (((Border)sender).Background != myBrush_White)
@@ -163,16 +181,15 @@ namespace WpfApp2
                     int elementoAt = Convert.ToInt32(((Border)sender).Tag);
                     textBlock.Text = symbolosAleatoriosFijo.ElementAt(elementoAt);
 
-                    if(elementoAt % 2 != 0)
+                    if (tag % 2 != 0)
                         textBlockAnterior1 = textBlock;
                     else
                         textBlockAnterior2 = textBlock;
-                    
+                    tag++;
                 }
             }
-            
         }
-
+        //RadioButtons > depende de lo que este elegido para filas que se acumulan.
         private void RadioButton_Checked_Baja(object sender, RoutedEventArgs e)
         {
             numeroFilas = 3;
@@ -185,9 +202,11 @@ namespace WpfApp2
         {
             numeroFilas = 5;
         }
-
+        //Se inicializa los componentes desde cero y borra las columnas y filas del grid que se crea para iniciar la partida y llama a los metodos "GuardaArrayAleatorio()" y "CreaCartasParaOcultar()"
         private void Button_Click_Iniciar(object sender, RoutedEventArgs e)
         {
+            ComponentesParaIniciar();
+
             if (numeroFilas > 0)
             {
                 gridPrincipal.ColumnDefinitions.Clear();
@@ -198,22 +217,11 @@ namespace WpfApp2
                 GuardaArrayAleatorio();
 
                 CreaCartasParaOcultar();
-
-                
-
                 
             }
             
         }
-        private void Window_ContentRendered(object sender, EventArgs e)
-        {
-            for (int i = 0; i < 100; i++)
-            {
-                pbStatus.Value++;
-                Thread.Sleep(100);
-            }
-        }
-
+        //Saca symbolo aleatorio de la lista sin repetir
         private string DevuelveSymboloAleatorio()
         {
             string symbolo = "";
@@ -227,7 +235,21 @@ namespace WpfApp2
             
             return symbolo;
         }
-
+        //Muestra todos los symbols y la partida se acaba.
+        private void Button_Click_Mostrar(object sender, RoutedEventArgs e)
+        {
+            if (juegoIniciado)
+            {
+                int index = 0;
+                for (int i = 0; i < numeroFilas; i++)
+                    for (int j = 0; j < COLUMNAS; j++)
+                    {
+                        VisualizarCartaConIconoYPosicion(i, j, symbolosAleatoriosFijo.ElementAt(index++), myBrush_White);
+                    }
+            }
+            
+        }
     }
+    
 
 }

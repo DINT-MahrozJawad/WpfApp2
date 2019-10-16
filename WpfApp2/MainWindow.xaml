@@ -19,10 +19,8 @@
         </Border>
         <Border Background="White" Margin="10" Height="50" CornerRadius="10" DockPanel.Dock="Bottom"  BorderThickness="3" BorderBrush="Black">
             <StackPanel  Orientation="Horizontal">
-                <DockPanel LastChildFill="True" >
-                    <ProgressBar  Margin="10" Height="15" Width="450" DockPanel.Dock="Left" Minimum="0" Maximum="100" Value="75" Name="pbStatus" IsIndeterminate="False" />
-                    <Button DockPanel.Dock="Right"  Height="20" Width="75" Content="Mostrar"  />
-                </DockPanel>
+                <ProgressBar  Margin="10" Height="15"  Width="450" DockPanel.Dock="Left" Minimum="0" Maximum="100"  Name="pbStatus" IsIndeterminate="False" />
+                <Button Click="Button_Click_Mostrar"  Height="20" Width="75" Content="Mostrar"  />
             </StackPanel>
         </Border>
 
