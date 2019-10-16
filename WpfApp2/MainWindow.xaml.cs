@@ -26,38 +26,59 @@ namespace WpfApp2
         private List<string> yaCogidoValor;
         private int numeroFilas = int.MinValue;
         private const string iconoOculto = "❓";
-        private List<string> symbolosAleatorios;
+        private List<string> symbolosAleatoriosFijo;
         private string[] arraySymbolos;
+        private int tag;
+        private int columnasXFilas;
         private Random random;
         private Border border;
         private Viewbox viewbox;
         private TextBlock textBlock;
-        private TextBlock textBlockAnterior;
+        private TextBlock textBlockAnterior1;
+        private TextBlock textBlockAnterior2;
         private LinearGradientBrush myBrush = new LinearGradientBrush();
         private LinearGradientBrush myBrush_White = new LinearGradientBrush();
 
         public MainWindow()
         {
             InitializeComponent();
-            arraySymbolos = new string[] { "🌟", "💎", "🍂", "🎥", "❤️", "📢", "✈️", "🦄", "🌻", "📷", "⚽️", "💸", "🌴", "🕷", "🎈", "🐢", "🌎", "💲", "🎁", "🗡" };
+            tag = 0;
+            arraySymbolos = new string[] { "🌟", "💎", "🍂", "🎥", "❤️", "📢", "✈️", "🌻", "📷", "⚽️", "💸", "🌴", "🎈", "🐢", "🌎", "💲", "🎁" };
             yaCogidoValor = new List<string>();
-            symbolosAleatorios = new List<string>();
+            symbolosAleatoriosFijo = new List<string>();
             random = new Random();
             myBrush.GradientStops.Add(new GradientStop(Colors.Yellow, 0.0));
             myBrush.GradientStops.Add(new GradientStop(Colors.Orange, 0.5));
             myBrush.GradientStops.Add(new GradientStop(Colors.Red, 1.0));
             myBrush_White.GradientStops.Add(new GradientStop(Colors.White, 0));
-
         }
 
         private void GuardaArrayAleatorio()
         {
-            for (int i = 0; i < COLUMNAS*numeroFilas/2; i++)
+            string[] symbolosAleatorios = new string[columnasXFilas];
+            int aleatorio = 0;
+
+            for (int i = 0; i < columnasXFilas; i++)
             {
                 string symbolo = DevuelveSymboloAleatorio();
-                symbolosAleatorios.Add(symbolo);
-                symbolosAleatorios.Add(symbolo);
+                symbolosAleatorios[i] = symbolo;
+                i++;
+                symbolosAleatorios[i] = symbolo;
+
             }
+            do
+            {
+                aleatorio = random.Next(0, columnasXFilas);
+
+                if (symbolosAleatorios[aleatorio] != "")
+                {
+                    symbolosAleatoriosFijo.Add(symbolosAleatorios[aleatorio]);
+                    symbolosAleatorios[aleatorio] = "";
+                }
+                
+
+            } while (symbolosAleatoriosFijo.Count != columnasXFilas) ;
+            
         }
 
         private void CreaCartasParaOcultar()
@@ -86,8 +107,10 @@ namespace WpfApp2
             border.Background = background;
             border.Margin = new Thickness(2);
             border.CornerRadius = new CornerRadius(5);
+            border.Tag = tag++;
 
             border.MouseLeftButtonDown += Border_MouseLeftButtonDown;
+            border.MouseLeftButtonUp += Border_MouseLeftButtonUp;
             textBlock.Text = icono;
 
             gridPrincipal.Children.Add(border);
@@ -97,30 +120,35 @@ namespace WpfApp2
             Grid.SetColumn(border, j);
         }
 
+        private void Border_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (textBlockAnterior1 != null && textBlockAnterior2 != null)
+            {
+                Thread.Sleep(500);
+                if (textBlockAnterior1.Text != textBlockAnterior2.Text)
+                {
+                    viewbox = (Viewbox)textBlockAnterior1.Parent;
+                    border = (Border)viewbox.Parent;
+                    border.Background = myBrush;
+                    textBlockAnterior1.Text = iconoOculto;
+
+                    viewbox = (Viewbox)textBlockAnterior2.Parent;
+                    border = (Border)viewbox.Parent;
+                    border.Background = myBrush;
+                    textBlockAnterior2.Text = iconoOculto;
+                    
+                }
+                else
+                {
+                    //
+                }
+                textBlockAnterior1 = null;
+                textBlockAnterior2 = null;
+            }
+        }
+        
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            border = ((Border)sender);
-            viewbox = (Viewbox)border.Child;
-
-            if(textBlockAnterior != null)
-            {
-                if (textBlockAnterior.Text != ((TextBlock)viewbox.Child).Text)
-                {
-                    viewbox = new Viewbox();
-                    textBlock = new TextBlock();
-                    ((Border)sender).Background = myBrush;
-                    ((Border)sender).Child = viewbox;
-
-                    textBlock.Text = iconoOculto;
-                }
-            }
-            
-
-            textBlockAnterior = (TextBlock)viewbox.Child;
-
-
-
-
             if (((Border)sender).Background != myBrush_White)
             {
                 viewbox = new Viewbox();
@@ -128,22 +156,21 @@ namespace WpfApp2
                 ((Border)sender).Background = myBrush_White;
                 ((Border)sender).Child = viewbox;
 
-                if (((Border)sender).Tag == null)
-                    ((Border)sender).Tag = symbolosAleatorios.Count;
-
                 viewbox.Child = textBlock;
 
-                if (symbolosAleatorios.Count != 0)
+                if (symbolosAleatoriosFijo.Count != 0)
                 {
-                    int aleatorio = random.Next(0, symbolosAleatorios.Count);
-                    textBlock.Text = symbolosAleatorios.ElementAt(aleatorio);
+                    int elementoAt = Convert.ToInt32(((Border)sender).Tag);
+                    textBlock.Text = symbolosAleatoriosFijo.ElementAt(elementoAt);
 
-                    symbolosAleatorios.RemoveAt(aleatorio);
+                    if(elementoAt % 2 != 0)
+                        textBlockAnterior1 = textBlock;
+                    else
+                        textBlockAnterior2 = textBlock;
+                    
                 }
             }
-
-
-
+            
         }
 
         private void RadioButton_Checked_Baja(object sender, RoutedEventArgs e)
@@ -166,10 +193,15 @@ namespace WpfApp2
                 gridPrincipal.ColumnDefinitions.Clear();
                 gridPrincipal.RowDefinitions.Clear();
                 yaCogidoValor.Clear();
-                symbolosAleatorios.Clear();
+                columnasXFilas = COLUMNAS * numeroFilas;
+
                 GuardaArrayAleatorio();
 
                 CreaCartasParaOcultar();
+
+                
+
+                
             }
             
         }
@@ -187,7 +219,7 @@ namespace WpfApp2
             string symbolo = "";
             do
             {
-                int aleatorio = random.Next(0, 20);
+                int aleatorio = random.Next(0, 17);
                 symbolo = arraySymbolos[aleatorio];
 
             } while (yaCogidoValor.Contains(symbolo));
