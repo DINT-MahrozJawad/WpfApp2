@@ -31,8 +31,10 @@ namespace WpfApp2
         private int columnasXFilas;
         private int sumaCartas;
         private bool juegoIniciado;
+        private bool cartasCerradas;
         private List<string> yaCogidoValor;
         private List<string> symbolosAleatoriosFijo;
+        private DispatcherTimer timer;
         private Random random;
         private Border border;
         private Viewbox viewbox;
@@ -49,6 +51,11 @@ namespace WpfApp2
         //Inicializo Componentes.
         public void ComponentesParaIniciar()
         {
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(0.5);
+            timer.Tick += Timer_Tick;
+
+            cartasCerradas = true;
             juegoIniciado = true;
             pbStatus.Value = 0;
             tag = 0;
@@ -64,6 +71,13 @@ namespace WpfApp2
             myBrush.GradientStops.Add(new GradientStop(Colors.Red, 1.0));
             myBrush_White.GradientStops.Add(new GradientStop(Colors.White, 0));
         }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            timer.Stop();
+            gridPrincipal.IsEnabled = true;
+        }
+
         //Sacndo Symbolos Aleatorio y guardando en una lissta.
         private void GuardaArrayAleatorio()
         {
@@ -136,9 +150,11 @@ namespace WpfApp2
         {
             if (textBlockAnterior1 != null && textBlockAnterior2 != null)
             {
-                Thread.Sleep(500);
                 if (textBlockAnterior1.Text != textBlockAnterior2.Text)
                 {
+                    gridPrincipal.IsEnabled = false;
+                    timer.Start();
+                    Thread.Sleep(500);
                     viewbox = (Viewbox)textBlockAnterior1.Parent;
                     border = (Border)viewbox.Parent;
                     border.Background = myBrush;
@@ -148,11 +164,12 @@ namespace WpfApp2
                     border = (Border)viewbox.Parent;
                     border.Background = myBrush;
                     textBlockAnterior2.Text = iconoOculto;
+                    
                 }
                 else
                 {
                     sumaCartas +=2;
-                    float a = sumaCartas * 100 / columnasXFilas;
+                    double a = (sumaCartas * 100 / columnasXFilas);
                     int value = (int)Math.Round(a, 0);
                     pbStatus.Value = value;
                     if (sumaCartas == columnasXFilas)
@@ -200,7 +217,7 @@ namespace WpfApp2
         }
         private void RadioButton_Checked_Alta(object sender, RoutedEventArgs e)
         {
-            numeroFilas = 5;
+            numeroFilas = 8;
         }
         //Se inicializa los componentes desde cero y borra las columnas y filas del grid que se crea para iniciar la partida y llama a los metodos "GuardaArrayAleatorio()" y "CreaCartasParaOcultar()"
         private void Button_Click_Iniciar(object sender, RoutedEventArgs e)
