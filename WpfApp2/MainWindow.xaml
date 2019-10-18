@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp2"
         mc:Ignorable="d"
-        Title="Busca Parejas" Height="502" Width="615" Background="SandyBrown" Icon="juego_icon.ico">
+        Title="Busca Parejas" Height="502" Width="615" Background="SandyBrown" Icon="juego_icon.ico" MinHeight="502" MinWidth="615">
 
     <DockPanel>
         <Border Style="{StaticResource borders}" DockPanel.Dock="Top">

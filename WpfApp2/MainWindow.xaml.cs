@@ -29,13 +29,12 @@ namespace WpfApp2
 
         private const int COLUMNAS = 4;
         private int numeroFilas = int.MinValue;
-        private const string iconoOculto = "❓";
+        private const string iconoOculto = "s";
         private string[] arraySymbolos;
         private int tag;
         private int columnasXFilas;
         private int sumaCartas;
         private bool juegoIniciado;
-        private int tiempoQueEspera;
         private List<string> yaCogidoValor;
         private List<string> symbolosAleatoriosFijo;
         private DispatcherTimer timer;
@@ -51,13 +50,15 @@ namespace WpfApp2
         public MainWindow()
         {
             InitializeComponent();
+
+
+
         }
         //Inicializo Componentes desde cero.
         public void ComponentesParaIniciar()
         {
-            tiempoQueEspera = 500;
             timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(tiempoQueEspera / 1000);
+            timer.Interval = TimeSpan.FromSeconds(0.5);
             timer.Tick += Timer_Tick;
 
             columnasXFilas = COLUMNAS * numeroFilas;
@@ -65,7 +66,7 @@ namespace WpfApp2
             pbStatus.Value = 0;
             tag = 0;
             sumaCartas = 0;
-            arraySymbolos = new string[] { "🌟", "💎", "🍂", "🎥", "❤️", "📢", "✈️", "🌻", "📷", "⚽️", "💸", "🌴", "🎈", "🐢", "🌎", "💲", "🎁" };
+            arraySymbolos = new string[] { "q","w","e","r","t","y","u","i","o","p","a","z","x","c","v","b","n","m","d","f,","g","h","j","k","l" };
             yaCogidoValor = new List<string>();
             symbolosAleatoriosFijo = new List<string>();
             random = new Random();
@@ -80,8 +81,14 @@ namespace WpfApp2
         private void Timer_Tick(object sender, EventArgs e)
         {
             //paro el despatcherTimer y Habilito mi grid principal.
+            OcultaIconoYCambiaBackground(textBlockAnterior1);
+            OcultaIconoYCambiaBackground(textBlockAnterior2);
+            
             timer.Stop();
             gridPrincipal.IsEnabled = true;
+
+            textBlockAnterior1 = null;
+            textBlockAnterior2 = null;
         }
 
         //Sacndo Symbolos Aleatorio y guardando en una lissta.
@@ -125,7 +132,7 @@ namespace WpfApp2
                     VisualizarCartaConIconoYPosicion(i, j, iconoOculto, myBrush);
         }
         //Visualiza cartas para el metodo "CreaCartasParaOcultar()".
-        private void VisualizarCartaConIconoYPosicion(int i, int j, string icono, LinearGradientBrush background)
+        private void VisualizarCartaConIconoYPosicion(int i, int j, string letra, LinearGradientBrush background)
         {
             border = new Border();
             viewbox = new Viewbox();
@@ -139,9 +146,9 @@ namespace WpfApp2
             border.Tag = tag++;
             //Agregando Eventos.
             border.MouseLeftButtonDown += Border_MouseLeftButtonDown;
-            border.MouseLeftButtonUp += Border_MouseLeftButtonUp;
             //Agrego el icono pasado
-            textBlock.Text = icono;
+            textBlock.FontFamily = new FontFamily("Webdings");
+            textBlock.Text = letra;
             //Añado cada hijo dentro de su padre.
             gridPrincipal.Children.Add(border);
             border.Child = viewbox;
@@ -149,39 +156,8 @@ namespace WpfApp2
             Grid.SetRow(border, i);
             Grid.SetColumn(border, j);
         }
-        //Comparo los symbolos si son iguales o no, si son iguales se quedan abiertos y la barra se avanza lo que se debe avanzar.
-        private void Border_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            //Si los dos son distintos que nulo, me entro.
-            if (textBlockAnterior1 != null && textBlockAnterior2 != null)
-            {
-                if (textBlockAnterior1.Text != textBlockAnterior2.Text)
-                {
-                    //DesHabilito mi grid principal para medio segundo. Utilizando DispatcherTimer.
-                    gridPrincipal.IsEnabled = false;
-                    timer.Start();
-                    //Duerme mi programa para que el DispatcherTimer se termina.
-                    Thread.Sleep(tiempoQueEspera);
-                    OcultaIconoYCambiaBackground(textBlockAnterior1);
-                    OcultaIconoYCambiaBackground(textBlockAnterior2);
-                }
-                else
-                {
-                    //Cada vez que aparecen dos cartas del mismo texto sumo hasta llegar al final.
-                    sumaCartas +=2;
-                    //Controlando la barra sacando su porcentaje de las cartas.
-                    double d = (sumaCartas * 100 / columnasXFilas);
-                    int value = (int)Math.Round(d, 0);
-                    pbStatus.Value = value;
-                    //Cuando termina la partida, muestro el mensaje.
-                    if (sumaCartas == columnasXFilas)
-                        MessageBox.Show("¡Enhorabuena! Partida Finalizada","Mensaje", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                textBlockAnterior1 = null;
-                textBlockAnterior2 = null;
-            }
-        }
-
+        
+        
         private void OcultaIconoYCambiaBackground(TextBlock t)
         {
             //Cogiendo desde padre, llegando hasta el hijo, para poner la imagen que es de ocultar y cambio el fondo
@@ -197,8 +173,8 @@ namespace WpfApp2
             //Si el sender tiene un background distinto que blanco pues me entro en el if.
             if (((Border)sender).Background != myBrush_White)
             {
-                viewbox = new Viewbox();
-                textBlock = new TextBlock();
+                viewbox = (Viewbox)((Border)sender).Child;
+                textBlock = (TextBlock)viewbox.Child;
                 //Cambio su background
                 ((Border)sender).Background = myBrush_White;
                 ((Border)sender).Child = viewbox;
@@ -218,6 +194,34 @@ namespace WpfApp2
                     tag++;
                 }
             }
+
+            //Comparo los symbolos si son iguales o no, si son iguales se quedan abiertos y la barra se avanza lo que se debe avanzar.
+
+            //Si los dos son distintos que nulo, me entro.
+            if (textBlockAnterior1 != null && textBlockAnterior2 != null)
+            {
+
+                if (textBlockAnterior1.Text != textBlockAnterior2.Text)
+                {
+                    gridPrincipal.IsEnabled = false;
+                    timer.Start();
+                }
+                else
+                {
+                    //Cada vez que aparecen dos cartas del mismo texto sumo hasta llegar al final.
+                    sumaCartas += 2;
+                    //Controlando la barra sacando su porcentaje de las cartas.
+                    double d = (sumaCartas * 100 / columnasXFilas);
+                    int value = (int)Math.Round(d, 0);
+                    pbStatus.Value = value;
+                    //Cuando termina la partida, muestro el mensaje.
+                    if (sumaCartas == columnasXFilas)
+                        MessageBox.Show("¡Enhorabuena! Partida Finalizada", "Mensaje", MessageBoxButton.OK, MessageBoxImage.Information);
+                    textBlockAnterior1 = null;
+                    textBlockAnterior2 = null;
+                }
+            }
+
         }
         //RadioButtons > depende de lo que este elegido para filas que se acumulan.
         private void RadioButton_Checked_Baja(object sender, RoutedEventArgs e)
@@ -264,8 +268,8 @@ namespace WpfApp2
 
                 //por si necesitamos coger más symbolos, Necesitamos salir del bucle porque ya cogido valor tendrá todos los symbolos ya cogido.
                 //if (i < columnasXFilas)
-                //    break;
-                
+                  //  break;
+
             } while (yaCogidoValor.Contains(symbolo)); // Sacando symbolo sin repetir.
             //Añado el symbolo en el array.
             yaCogidoValor.Add(symbolo);
@@ -277,6 +281,7 @@ namespace WpfApp2
         {
             //index para sacar todos los elemento de la lista recorriendo
             int index = 0;
+            pbStatus.Value = 100;
             if (juegoIniciado)
                 for (int i = 0; i < numeroFilas; i++)
                     for (int j = 0; j < COLUMNAS; j++) //Recorro como  una matriz y pongo el elemento (Sacado aleatorio: fijo) y cambio el background a blanco
