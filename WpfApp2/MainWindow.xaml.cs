@@ -18,9 +18,6 @@ using System.Windows.Threading;
 
 namespace WpfApp2
 {
-    /// <summary>
-    /// Lógica de interacción para MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         private const int filasX3 = 3;
@@ -31,37 +28,35 @@ namespace WpfApp2
         private int numeroFilas = int.MinValue;
         private const string iconoOculto = "s";
         private string[] arraySymbolos;
-        private int tag;
-        private int columnasXFilas;
-        private int sumaCartas;
+        private int tag, columnasXFilas, sumaCartas, numeroFilaRadioButton;
         private bool juegoIniciado;
-        private List<string> yaCogidoValor;
-        private List<string> symbolosAleatoriosFijo;
+        private List<string> yaCogidoValor, symbolosAleatoriosFijo;
         private DispatcherTimer timer;
         private Random random;
         private Border border;
         private Viewbox viewbox;
-        private TextBlock textBlock;
-        private TextBlock textBlockAnterior1;
-        private TextBlock textBlockAnterior2;
-        private LinearGradientBrush myBrush;
-        private LinearGradientBrush myBrush_White;
+        private TextBlock textBlock, textBlockAnterior1, textBlockAnterior2;
+        private LinearGradientBrush myBrush, myBrush_White;
 
         public MainWindow()
         {
             InitializeComponent();
-
-
-
         }
         //Inicializo Componentes desde cero.
         public void ComponentesParaIniciar()
         {
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(0.5);
+            timer = new DispatcherTimer{ Interval = TimeSpan.FromSeconds(0.5) };
             timer.Tick += Timer_Tick;
-
-            columnasXFilas = COLUMNAS * numeroFilas;
+            
+            //Borro las columnas y filas que se ha creado al iniciar el juego, por que si no se acumularán cada vez que iniciamos.
+            gridPrincipal.ColumnDefinitions.Clear();
+            gridPrincipal.RowDefinitions.Clear();
+            //y si el array es distinto que nulo, me resetea. 
+            if(yaCogidoValor != null)
+                yaCogidoValor.Clear();
+            //Asignando Valores.
+            numeroFilaRadioButton = numeroFilas; //creo una variable para guardar las filas después de iniciar el juego.
+            columnasXFilas = COLUMNAS * numeroFilaRadioButton;
             juegoIniciado = true;
             pbStatus.Value = 0;
             tag = 0;
@@ -123,11 +118,11 @@ namespace WpfApp2
             for (int j = 0; j < COLUMNAS; j++)
                 gridPrincipal.ColumnDefinitions.Add(new ColumnDefinition());
             //crea filas
-            for (int i = 0; i < numeroFilas; i++)
+            for (int i = 0; i < numeroFilaRadioButton; i++)
                 gridPrincipal.RowDefinitions.Add(new RowDefinition());
 
             //Cartas en esas columna*Filas
-            for (int i = 0; i < numeroFilas; i++)
+            for (int i = 0; i < numeroFilaRadioButton; i++)
                 for (int j = 0; j < COLUMNAS; j++)
                     VisualizarCartaConIconoYPosicion(i, j, iconoOculto, myBrush);
         }
@@ -178,13 +173,14 @@ namespace WpfApp2
                 //Cambio su background
                 ((Border)sender).Background = myBrush_White;
                 ((Border)sender).Child = viewbox;
-
+                //Cambio el texto
                 viewbox.Child = textBlock;
 
-                if (symbolosAleatoriosFijo.Count != 0)
+                //Cuando creo la carta le asigno su TAG. y aquí saco para scar el elemento de un array aleatorio.
+                int elementoAt = Convert.ToInt32(((Border)sender).Tag);
+
+                if (elementoAt < symbolosAleatoriosFijo.Count)
                 {
-                    //Cuando creo la carta le asigno su TAG. y aquí saco para scar el elemento de un array aleatorio.
-                    int elementoAt = Convert.ToInt32(((Border)sender).Tag);
                     textBlock.Text = symbolosAleatoriosFijo.ElementAt(elementoAt);
                     //Creo una variable tag que si es par coje el primer textBlockAnterior y cuando no es par coge segundo textoBlockAnterior y se puede poner viseversa.
                     if (tag % 2 != 0) //Simplemento compruebo par y impar.
@@ -200,7 +196,6 @@ namespace WpfApp2
             //Si los dos son distintos que nulo, me entro.
             if (textBlockAnterior1 != null && textBlockAnterior2 != null)
             {
-
                 if (textBlockAnterior1.Text != textBlockAnterior2.Text)
                 {
                     gridPrincipal.IsEnabled = false;
@@ -223,21 +218,21 @@ namespace WpfApp2
             }
 
         }
-        //RadioButtons > depende de lo que este elegido para filas que se acumulan.
+        //RadioButtons -> depende de lo que este elegido para filas que se acumulan.
         private void RadioButton_Checked_Baja(object sender, RoutedEventArgs e)
         {
             //Asigno numeroFilas
-            numeroFilas = filasX3;
+                numeroFilas = filasX3;
         }
         private void RadioButton_Checked_Media(object sender, RoutedEventArgs e)
         {
             //Asigno numeroFilas
-            numeroFilas = filasX4;
+                numeroFilas = filasX4;
         }
         private void RadioButton_Checked_Alta(object sender, RoutedEventArgs e)
         {
             //Asigno numeroFilas
-            numeroFilas = filasX5;
+                numeroFilas = filasX5;
         }
         //Se inicializa los componentes desde cero y borra las columnas y filas del grid que se crea para iniciar la partida y llama a los metodos "GuardaArrayAleatorio()" y "CreaCartasParaOcultar()"
         private void Button_Click_Iniciar(object sender, RoutedEventArgs e)
@@ -247,10 +242,6 @@ namespace WpfApp2
             //si número de filas es mayor que 0, porque al inicializar le pongo el valor minimo por defecto.
             if (numeroFilas > 0)
             {
-                //Borro las columnas y filas que se ha creado al iniciar el juego, por que si no se acumularán cada vez que iniciamos.
-                gridPrincipal.ColumnDefinitions.Clear();
-                gridPrincipal.RowDefinitions.Clear();
-                yaCogidoValor.Clear();
                 //LLamo a los metodos.
                 GuardaArrayAleatorio();
                 CreaCartasParaOcultar();
@@ -266,7 +257,7 @@ namespace WpfApp2
                 int aleatorio = random.Next(0, arraySymbolos.Length);
                 symbolo = arraySymbolos[aleatorio];
 
-                //por si necesitamos coger más symbolos, Necesitamos salir del bucle porque ya cogido valor tendrá todos los symbolos ya cogido.
+                //por si necesitamos coger más symbolos repetitivos, Necesitamos salir del bucle porque ya cogido valor tendrá todos los symbolos ya cogido.
                 //if (i < columnasXFilas)
                   //  break;
 
@@ -281,11 +272,14 @@ namespace WpfApp2
         {
             //index para sacar todos los elemento de la lista recorriendo
             int index = 0;
-            pbStatus.Value = 100;
             if (juegoIniciado)
-                for (int i = 0; i < numeroFilas; i++)
+            {
+                pbStatus.Value = 100;
+                for (int i = 0; i < numeroFilaRadioButton; i++)
                     for (int j = 0; j < COLUMNAS; j++) //Recorro como  una matriz y pongo el elemento (Sacado aleatorio: fijo) y cambio el background a blanco
                         VisualizarCartaConIconoYPosicion(i, j, symbolosAleatoriosFijo.ElementAt(index++), myBrush_White);
+            }
+            
         }
     }
 }
